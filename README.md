@@ -67,3 +67,22 @@ class ExampleModel extends ActiveRecord implements IdentityInterface, UserCreden
     }
 }
 ```
+
+i18n
+--
+
+add in `common\config\main.php`
+
+````php
+'components' => [
+    ...
+    'i18n' => [
+        'translations' => [
+            'psw' => [
+                'class' => PhpMessageSource::class,
+                'basePath' => '@antonyz89/password_behaviour/messages',
+            ]
+        ],
+    ]
+];
+````
