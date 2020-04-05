@@ -1,0 +1,33 @@
+{
+    "name": "antonyz89/yii2-password-behavior",
+    "description": "Behavior for manage password",
+    "type": "yii2-extension",
+    "keywords": [
+        "yii2",
+        "extension",
+        "password",
+        "behavior",
+        "antonyz89"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "AntonyZ89",
+            "email": "antonyz.dev@gmail.com"
+        }
+    ],
+    "require": {
+        "yiisoft/yii2": "~2.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "antonyz89\\password_behavior\\": "src"
+        }
+    },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/AntonyZ89/yii2-password-behavior"
+        }
+    ]
+}
