@@ -76,7 +76,7 @@ class PasswordBehavior extends Behavior
                     'confirm_password' => Yii::t('psw', 'The passwords are different')
                 ]);
             }
-        } if ($this->owner->{$this->new_password} || $this->owner->{$this->confirm_password}) {
+        } else if ($this->owner->{$this->new_password} || $this->owner->{$this->confirm_password}) {
             if ($this->owner->{$this->new_password} !== $this->owner->{$this->confirm_password}) {
                 $this->owner->addErrors([
                     'new_password' => Yii::t('psw', 'The passwords are different'),
