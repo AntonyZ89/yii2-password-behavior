@@ -5,6 +5,7 @@ namespace antonyz89\password_behavior;
 
 use Yii;
 use yii\base\Behavior;
+use yii\base\Event;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
 use yii\db\ActiveRecord;
@@ -68,7 +69,14 @@ class PasswordBehavior extends Behavior
 
     public function validate()
     {
-        if ($this->owner->{$this->new_password} || $this->owner->{$this->confirm_password}) {
+        if($this->owner->isNewRecord && $this->owner->{$this->password_hash}) {
+            if ($this->owner->{$this->password_hash} !== $this->owner->{$this->confirm_password}) {
+                $this->owner->addErrors([
+                    'password_hash' => Yii::t('psw', 'The passwords are different'),
+                    'confirm_password' => Yii::t('psw', 'The passwords are different')
+                ]);
+            }
+        } if ($this->owner->{$this->new_password} || $this->owner->{$this->confirm_password}) {
             if ($this->owner->{$this->new_password} !== $this->owner->{$this->confirm_password}) {
                 $this->owner->addErrors([
                     'new_password' => Yii::t('psw', 'The passwords are different'),
