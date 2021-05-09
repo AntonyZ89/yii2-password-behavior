@@ -68,6 +68,42 @@ class ExampleModel extends ActiveRecord implements IdentityInterface, UserCreden
 }
 ```
 
+If want to ignore `$confirm_password` and/or `$old_password`, just do:
+
+```php
+/**
+ * @property string $password
+ */
+class ExampleModel extends ActiveRecord implements IdentityInterface, UserCredentialsInterface {
+    public $new_password;
+
+    // new_password can be skipped because they already exists
+    
+    /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => PasswordBehavior::class,
+                'password_hash' => 'password',
+                /*
+                 * Will be ignored and comparison between 
+                 * `$confirm_password` and `$new_password` or `$password_hash` will not happen
+                 */
+                'confirm_password' => false, 
+                /*
+                 * Will be ignored and comparison between 
+                 * `old_password` and `$new_password` will not happen
+                 */
+                'old_password' => false
+            ]
+        ];
+    }
+}
+```
+
 i18n
 --
 
