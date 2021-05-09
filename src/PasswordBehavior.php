@@ -5,7 +5,6 @@ namespace antonyz89\password_behavior;
 
 use Yii;
 use yii\base\Behavior;
-use yii\base\Event;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
 use yii\db\ActiveRecord;
@@ -23,7 +22,37 @@ use yii\db\ActiveRecord;
 class PasswordBehavior extends Behavior
 {
 
-    public $password_hash, $new_password, $confirm_password, $old_password;
+    /**
+     * @var string
+     */
+    public $password_hash;
+
+    /**
+     * @var string
+     */
+    public $new_password;
+
+    /**
+     * @var string|false
+     *
+     * Set this property to false if you do not want to
+     * compare `$confirm_password` with `$password_hash` (create) or `$new_password` (update)
+     */
+    public $confirm_password;
+
+    /**
+     * @var string|false
+     *
+     * Set this property to false if you do not want to compare `$new_password` with `$old_password`
+     */
+    public $old_password;
+
+    /**
+     * @var string|false
+     *
+     * Set this property to false if you do not want to regenerate authentication key after change password
+     */
+    public $auth_key;
 
     /**
      * @throws InvalidConfigException
@@ -31,15 +60,15 @@ class PasswordBehavior extends Behavior
     public function customInit()
     {
         extract(get_object_vars($this));
-        $compact = compact('password_hash', 'new_password', 'confirm_password', 'old_password');
+        $compact = compact('password_hash', 'new_password', 'confirm_password', 'old_password', 'auth_key');
 
         foreach ($compact as $variable => $value) {
             if ($this->owner->hasAttribute($variable) || $this->owner->hasProperty($variable)) {
                 $this->$variable = $variable;
                 continue;
             }
-            if (!$value) {
-                throw new InvalidConfigException("PasswordBehaviour: $$variable is required.");
+            if ($value === null) {
+                throw new InvalidConfigException("PasswordBehaviour: \"$$variable\" is required.");
             }
         }
 
@@ -69,21 +98,27 @@ class PasswordBehavior extends Behavior
 
     public function validate()
     {
-        if($this->owner->isNewRecord && $this->owner->{$this->password_hash}) {
-            if ($this->owner->{$this->password_hash} !== $this->owner->{$this->confirm_password}) {
+        if ($this->owner->isNewRecord && $this->owner->{$this->password_hash}) {
+            if (
+                $this->confirm_password !== false &&
+                $this->owner->{$this->password_hash} !== $this->owner->{$this->confirm_password}
+            ) {
                 $this->owner->addErrors([
-                    'password_hash' => Yii::t('psw', 'The passwords are different'),
-                    'confirm_password' => Yii::t('psw', 'The passwords are different')
+                    'password_hash' => Yii::t('psw', 'The passwords are different.'),
+                    'confirm_password' => Yii::t('psw', 'The passwords are different.')
                 ]);
             }
-        } else if ($this->owner->{$this->new_password} || $this->owner->{$this->confirm_password}) {
+        } else if (
+            $this->confirm_password !== false
+            && ($this->owner->{$this->new_password} || $this->owner->{$this->confirm_password})
+        ) {
             if ($this->owner->{$this->new_password} !== $this->owner->{$this->confirm_password}) {
                 $this->owner->addErrors([
-                    'new_password' => Yii::t('psw', 'The passwords are different'),
-                    'confirm_password' => Yii::t('psw', 'The passwords are different')
+                    'new_password' => Yii::t('psw', 'The passwords are different.'),
+                    'confirm_password' => Yii::t('psw', 'The passwords are different.')
                 ]);
             } else if (!$this->validatePassword($this->owner->{$this->old_password})) {
-                $this->owner->addError('old_password', Yii::t('psw', 'Incorrect password'));
+                $this->owner->addError('old_password', Yii::t('psw', 'Incorrect password.'));
             }
         }
     }
@@ -92,16 +127,27 @@ class PasswordBehavior extends Behavior
      * @param $password
      * @throws Exception
      */
-    private function setPassword($password)
+    protected function setPassword($password)
     {
         $this->owner->{$this->password_hash} = Yii::$app->security->generatePasswordHash($password);
+        $this->setAuthKey();
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function setAuthKey()
+    {
+        if ($this->auth_key !== false) {
+            $this->owner->{$this->auth_key} = Yii::$app->security->generateRandomString();
+        }
     }
 
     /**
      * @param $password
      * @return bool
      */
-    private function validatePassword($password)
+    protected function validatePassword($password)
     {
         try {
             return Yii::$app->security->validatePassword($password, $this->owner->{$this->password_hash});

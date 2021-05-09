@@ -17,6 +17,6 @@
  * NOTE: this file must be saved in UTF-8 encoding.
  */
 return [
-    'The passwords are different' => 'As senhas são diferentes',
-    'Incorrect password' => 'Senha incorreta',
+    'The passwords are different.' => 'As senhas são diferentes.',
+    'Incorrect password.' => 'Senha incorreta.',
 ];
