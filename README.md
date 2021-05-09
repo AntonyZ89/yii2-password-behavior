@@ -47,7 +47,7 @@ If you have this variables, but the name is different, just do:
  * @property string $password
  */
 class ExampleModel extends ActiveRecord implements IdentityInterface, UserCredentialsInterface {
-    public $new_password, $confirmPsw, $oldPsw;
+    public $new_password, $confirmPsw, $oldPsw, $authorizationKey;
 
     // new_password can be skipped because they already exists
     
@@ -61,6 +61,7 @@ class ExampleModel extends ActiveRecord implements IdentityInterface, UserCreden
                 'class' => PasswordBehavior::class,
                 'password_hash' => 'password',
                 'confirm_password' => 'confirmPsw',
+                'auth_key' => 'authorizationKey',
                 'old_password' => 'oldPsw'
             ]
         ];
@@ -68,7 +69,7 @@ class ExampleModel extends ActiveRecord implements IdentityInterface, UserCreden
 }
 ```
 
-If want to ignore `$confirm_password` and/or `$old_password`, just do:
+If want to ignore `$confirm_password`, `$old_password` and/or `$auth_key`, just do:
 
 ```php
 /**
@@ -97,7 +98,12 @@ class ExampleModel extends ActiveRecord implements IdentityInterface, UserCreden
                  * Will be ignored and comparison between 
                  * `old_password` and `$new_password` will not happen
                  */
-                'old_password' => false
+                'old_password' => false,
+                /*
+                 * Will be ignored and when a new password is defined
+                 * a new Authorization Key will not generated
+                 */
+                'auth_key' => false
             ]
         ];
     }
