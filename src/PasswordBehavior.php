@@ -24,11 +24,15 @@ class PasswordBehavior extends Behavior
 
     /**
      * @var string
+     *
+     * Used on create
      */
     public $password_hash;
 
     /**
      * @var string
+     *
+     * Used on update
      */
     public $new_password;
 
@@ -63,10 +67,15 @@ class PasswordBehavior extends Behavior
         $compact = compact('password_hash', 'new_password', 'confirm_password', 'old_password', 'auth_key');
 
         foreach ($compact as $variable => $value) {
+            if ($value === false) {
+                continue;
+            }
+
             if ($this->owner->hasAttribute($variable) || $this->owner->hasProperty($variable)) {
                 $this->$variable = $variable;
                 continue;
             }
+
             if ($value === null) {
                 throw new InvalidConfigException("PasswordBehaviour: \"$$variable\" is required.");
             }

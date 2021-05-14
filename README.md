@@ -36,6 +36,24 @@ public function behaviors()
 }
 ```
 
+`_form.php`:
+
+```php
+<div class="row">
+    <div class="col-md-4">
+        <?= $form->field($model, 'email')->textInput(['maxlength' => true]) ?>
+        <?php if ($model->isNewRecord): ?>
+            <?= $form->field($model, 'password_hash')->passwordInput() ?> <!-- required on create -->
+            <?= $form->field($model, 'confirm_password')->passwordInput() ?>
+        <?php else: ?>
+            <?= $form->field($model, 'old_password')->passwordInput() ?>
+            <?= $form->field($model, 'new_password')->passwordInput() ?> <!-- required on update (replaces password_hash) -->
+            <?= $form->field($model, 'confirm_password')->passwordInput() ?>
+        <?php endif; ?>
+    </div> <!-- /.col-md-4 -->
+</div> <!-- /.row -->
+```
+
 To work properly, your Model need have this four variables:
 
 `$password_hash`, `$new_password`, `$confirm_password`, `$old_password`
