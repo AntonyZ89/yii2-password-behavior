@@ -7,6 +7,7 @@ use Yii;
 use yii\base\Behavior;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
+use yii\base\Model;
 use yii\db\ActiveRecord;
 
 /**
@@ -17,7 +18,7 @@ use yii\db\ActiveRecord;
  *
  * @link https://github.com/AntonyZ89
  *
- * @property ActiveRecord $owner
+ * @property ActiveRecord|Model $owner
  */
 class PasswordBehavior extends Behavior
 {
@@ -58,6 +59,8 @@ class PasswordBehavior extends Behavior
      */
     public $auth_key;
 
+    private $already_initiated = false;
+
     /**
      * @throws InvalidConfigException
      */
@@ -67,29 +70,31 @@ class PasswordBehavior extends Behavior
         $compact = compact('password_hash', 'new_password', 'confirm_password', 'old_password', 'auth_key');
 
         foreach ($compact as $variable => $value) {
-            if ($value === false) {
+            if ($value !== null) {
                 continue;
             }
 
-            if ($this->owner->hasAttribute($variable) || $this->owner->hasProperty($variable)) {
+            if (($this->owner instanceof ActiveRecord && $this->owner->hasAttribute($variable)) || $this->owner->hasProperty($variable)) {
                 $this->$variable = $variable;
                 continue;
             }
 
-            if ($value === null) {
-                throw new InvalidConfigException("PasswordBehaviour: \"$$variable\" is required.");
-            }
+            throw new InvalidConfigException("PasswordBehaviour: \"$$variable\" is required.");
         }
 
+        $this->already_initiated = true;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function events()
     {
         return [
             ActiveRecord::EVENT_INIT => 'customInit',
             ActiveRecord::EVENT_BEFORE_INSERT => 'check',
             ActiveRecord::EVENT_BEFORE_UPDATE => 'check',
-            ActiveRecord::EVENT_BEFORE_VALIDATE => 'validate'
+            Model::EVENT_AFTER_VALIDATE => 'validate'
         ];
     }
 
@@ -107,8 +112,15 @@ class PasswordBehavior extends Behavior
 
     public function validate()
     {
-        if ($this->owner->isNewRecord && $this->owner->{$this->password_hash}) {
+        if ($this->owner->hasErrors()) {
+            return;
+        }
+
+        !$this->already_initiated && $this->customInit();
+
+        if ($this->owner->isNewRecord) {
             if (
+                $this->owner->{$this->password_hash} &&
                 $this->confirm_password !== false &&
                 $this->owner->{$this->password_hash} !== $this->owner->{$this->confirm_password}
             ) {
