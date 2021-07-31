@@ -138,7 +138,7 @@ class PasswordBehavior extends Behavior
                     'new_password' => Yii::t('psw', 'The passwords are different.'),
                     'confirm_password' => Yii::t('psw', 'The passwords are different.')
                 ]);
-            } else if (!$this->validatePassword($this->owner->{$this->old_password})) {
+            } else if ($this->old_password !== false && !$this->validatePassword($this->owner->{$this->old_password})) {
                 $this->owner->addError('old_password', Yii::t('psw', 'Incorrect password.'));
             }
         }
