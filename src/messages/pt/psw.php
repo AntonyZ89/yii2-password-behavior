@@ -19,4 +19,7 @@
 return [
     'The passwords are different.' => 'As senhas são diferentes.',
     'Incorrect password.' => 'Senha incorreta.',
+    'Old password' => 'Senha antiga',
+    'New password' => 'Nova senha',
+    'Confirm password' => 'Confirmar senha',
 ];
