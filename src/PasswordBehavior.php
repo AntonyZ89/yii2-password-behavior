@@ -150,7 +150,10 @@ class PasswordBehavior extends Behavior
      */
     protected function setPassword($password)
     {
-        $this->owner->{$this->password_hash} = Yii::$app->security->generatePasswordHash($password);
+        if (!empty($this->owner->{$this->password_hash})) {
+            $this->owner->{$this->password_hash} = Yii::$app->security->generatePasswordHash($password);
+        }
+
         $this->setAuthKey();
     }
 
